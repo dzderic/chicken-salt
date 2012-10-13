@@ -65,7 +65,7 @@ care of serving the token we sniffed earlier and the previous master's public ke
 On the imposter master:
 
 ```sh
-sudo ln -s salt_master_monkey.py /usr/lib/pymodules/python2.7/salt/
+sudo ln -s "`pwd`/salt_master_monkey.py" /usr/lib/pymodules/python2.7/salt/
 sudo sh -c 'echo import salt_master_monkey >> /usr/lib/pymodules/python2.7/salt/__init__.py'
 ```
 
