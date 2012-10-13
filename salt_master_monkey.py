@@ -6,9 +6,11 @@ import os
 import salt.crypt
 
 class EvilMasterKeys(salt.crypt.MasterKeys):
-    def __gen_token(self):
+    def __init__(self, opts):
+        super(EvilMasterKeys, self).__init__(opts)
+
         token_path = os.path.join(self.opts['pki_dir'], 'token')
-        return open(token_path).read()
+        self.token = open(token_path).read()
 
     def get_pub_str(self):
         """
